@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>41203237 林沛佶 整合工具</title>
+    <style>
+        /* 基礎設定 */
+        :root {
+            --bg-home: #E3F2FD;
+            --bg-tomato: #FFF9C4;
+            --bg-money: #0000FF; /* 純藍色 */
+            --tomato-red: #FF5722;
+            --calc-pink: #FFC1CC;
+            --dark-coffee: #4E342E;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', "Microsoft JhengHei", sans-serif;
+            overflow: hidden;
+        }
+
+        section {
+            display: none; /* 預設隱藏所有頁面 */
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        /* 顯示目前頁面 */
+        section.active { display: flex; }
+
+        /* 個人資訊 */
+        .header-info {
+            position: absolute;
+            top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 10;
+        }
+
+        /* --- 1. 首頁樣式 --- */
+        #home-page { background-color: var(--bg-home); }
+        .nav-menu { display: flex; gap: 30px; margin-top: 50px; }
+        .link-btn {
+            padding: 20px 40px;
+            font-size: 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: none;
+        }
+        .btn-tomato { background-color: var(--tomato-red); }
+        .btn-money { background-color: #F06292; }
+        .link-btn:hover { transform: scale(1.1); }
+
+        /* --- 2. 共通工具樣式 --- */
+        .tool-box {
+            width: 500px;
+            height: 500px;
+            border-radius: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .display-text { font-size: 80px; color: white; margin-bottom: 20px; }
+        .money-text { font-size: 60px; font-weight: bold; color: #880E4F; }
+        .sub-text { font-size: 30px; color: #880E4F; }
+        
+        .controls { display: flex; flex-direction: column; gap: 15px; width: 80%; }
+        .btn-group { display: flex; gap: 10px; justify-content: center; }
+        input { padding: 10px; border-radius: 10px; border: none; text-align: center; font-size: 16px; }
+        
+        .action-btn { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+        .back-home { margin-top: 30px; cursor: pointer; color: inherit; font-weight: bold; text-decoration: underline; }
+
+        /* --- 特效 --- */
+        .warning { font-weight: bold; animation: blink 0.8s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* 番茄鐘截止：淺黃與深咖啡交互 */
+        .alarm-tomato { animation: flash-tomato 0.5s infinite; }
+        @keyframes flash-tomato { 0%, 100% { background-color: #FFF9C4; } 50% { background-color: #4E342E; } }
+
+        /* 計算機截止：綠色與深咖啡交互 */
+        .alarm-money { animation: flash-money 0.5s infinite; }
+        @keyframes flash-money { 0%, 100% { background-color: #4CAF50; } 50% { background-color: #4E342E; } }
+
+    </style>
+</head>
+<body id="master-body">
+
+    <section id="home-page" class="active">
+        <div class="header-info">41203237 林沛佶 2025/12/22</div>
+        <div class="nav-menu">
+            <button class="link-btn btn-tomato" onclick="goTo('tomato-page')">跳轉至：番茄鐘計時器</button>
+            <button class="link-btn btn-money" onclick="goTo('money-page')">跳轉至：金錢計算器</button>
+        </div>
+    </section>
+
+    <section id="tomato-page" style="background-color: var(--bg-tomato);">
+        <div class="header-info">41203237 林沛佶 2025/12/22</div>
+        <div class="tool-box" style="background-color: var(--tomato-red); border: 10px solid #E64A19;">
+            <div id="t-display" class="display-text">25:00</div>
+            <div class="controls">
+                <div class="btn-group">
+                    <input type="number" id="t-min" value="25" style="width: 60px;">
+                    <input type="number" id="t-sec" value="0" style="width: 60px;">
+                </div>
+                <div class="btn-group">
+                    <button class="action-btn" onclick="startTomato()">計時開始</button>
+                    <button class="action-btn" onclick="resetTomato()">清除</button>
+                </div>
+            </div>
+        </div>
+        <div class="back-home" onclick="goTo('home-page')">← 回到主選單</div>
+    </section>
+
+    <section id="money-page" style="background-color: var(--bg-money);">
+        <div class="header-info" style="color: white;">41203237 林沛佶 2025/12/22</div>
+        <div class="tool-box" style="background-color: var(--calc-pink); border: 10px solid #F48FB1;">
+            <div id="m-val" class="money-text">$ 0</div>
+            <div id="m-timer" class="sub-text">00:00</div>
+            <div class="controls">
+                <input type="number" id="m-input" placeholder="金額 (max 1000)">
+                <input type="number" id="m-time-input" placeholder="倒數秒數">
+                <div class="btn-group">
+                    <button class="action-btn" onclick="adjMoney(1)">增加 (+)</button>
+                    <button class="action-btn" onclick="adjMoney(-1)">減少 (-)</button>
+                    <button class="action-btn" onclick="startMoneyTimer()" style="background:#4CAF50; color:white;">開始計時</button>
+                    <button class="action-btn" onclick="resetMoney()" style="background:#757575; color:white;">清除</button>
+                </div>
+            </div>
+        </div>
+        <div class="back-home" style="color: white;" onclick="goTo('home-page')">← 回到主選單</div>
+    </section>
+
+    <script>
+        // 頁面跳轉邏輯
+        function goTo(pageId) {
+            // 隱藏所有頁面
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            // 停止所有動畫與計時
+            resetTomato();
+            resetMoney();
+            // 顯示目標頁面
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // --- 番茄鐘邏輯 ---
+        let tTimer;
+        function startTomato() {
+            clearInterval(tTimer);
+            document.getElementById('tomato-page').className = 'active';
+            let s = (parseInt(document.getElementById('t-min').value)||0)*60 + (parseInt(document.getElementById('t-sec').value)||0);
+            tTimer = setInterval(() => {
+                if(s <= 0) {
+                    clearInterval(tTimer);
+                    document.getElementById('tomato-page').classList.add('alarm-tomato');
+                } else {
+                    s--;
+                    let m = Math.floor(s/60), sec = s%60;
+                    let disp = document.getElementById('t-display');
+                    disp.textContent = `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+                    s <= 180 ? disp.classList.add('warning') : disp.classList.remove('warning');
+                }
+            }, 1000);
+        }
+        function resetTomato() {
+            clearInterval(tTimer);
+            document.getElementById('t-display').textContent = "25:00";
+            document.getElementById('t-display').classList.remove('warning');
+            document.getElementById('tomato-page').classList.remove('alarm-tomato');
+        }
+
+        // --- 金錢計算機邏輯 ---
+        let money = 0, mTimer;
+        function adjMoney(dir) {
+            let v = parseInt(document.getElementById('m-input').value) || 0;
+            money = Math.max(0, Math.min(1000, money + (v * dir)));
+            document.getElementById('m-val').textContent = `$ ${money}`;
+        }
+        function startMoneyTimer() {
+            clearInterval(mTimer);
+            document.getElementById('money-page').className = 'active';
+            let s = parseInt(document.getElementById('m-time-input').value) || 0;
+            mTimer = setInterval(() => {
+                if(s <= 0) {
+                    clearInterval(mTimer);
+                    document.getElementById('money-page').classList.add('alarm-money');
+                } else {
+                    s--;
+                    let m = Math.floor(s/60), sec = s%60;
+                    let disp = document.getElementById('m-timer');
+                    disp.textContent = `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+                    s <= 180 ? disp.classList.add('warning') : disp.classList.remove('warning');
+                }
+            }, 1000);
+        }
+        function resetMoney() {
+            clearInterval(mTimer);
+            money = 0;
+            document.getElementById('m-val').textContent = "$ 0";
+            document.getElementById('m-timer').textContent = "00:00";
+            document.getElementById('m-timer').classList.remove('warning');
+            document.getElementById('money-page').classList.remove('alarm-money');
+        }
+    </script>
+</body>
+</html>
